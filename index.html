@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#e9d8ff" />
+  <meta name="description" content="A friendship quiz: how well do you know me?" />
+  <title>How Well Do You Know Me? ❤️</title>
+
+  <!-- Fonts (optional: the site falls back to system fonts if offline) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Dancing+Script:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ===== Decorative background ===== -->
+  <div class="bg" aria-hidden="true">
+    <span class="blob blob-1"></span>
+    <span class="blob blob-2"></span>
+    <span class="blob blob-3"></span>
+  </div>
+  <div id="floaters" class="floaters" aria-hidden="true"></div>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <!-- ===== Music / sound toggle ===== -->
+  <button id="musicBtn" class="music-btn" type="button" aria-pressed="false" aria-label="Turn sound off" title="Sound on / off">
+    <span class="music-icon" aria-hidden="true">🎵</span>
+  </button>
+
+  <!-- Background music file (put your own at assets/music.mp3).
+       If the file is missing, a soft built-in melody plays instead. -->
+  <audio id="bgm" src="assets/music.mp3" loop preload="none"></audio>
+
+  <main class="app">
+
+    <!-- ================= 1. WELCOME ================= -->
+    <section id="welcome" class="screen active" aria-labelledby="welcomeTitle">
+      <div class="glass card welcome-card">
+        <div class="heart-hero" aria-hidden="true">
+          <svg viewBox="0 0 120 110" class="heart-svg" role="img">
+            <defs>
+              <linearGradient id="heartGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#ff9ec4" />
+                <stop offset="1" stop-color="#b58cff" />
+              </linearGradient>
+            </defs>
+            <path d="M60 104 C18 72 4 50 4 32 C4 16 16 6 31 6 C43 6 54 13 60 24 C66 13 77 6 89 6 C104 6 116 16 116 32 C116 50 102 72 60 104 Z" fill="url(#heartGrad)" />
+            <path d="M24 28 C24 21 29 17 35 17" stroke="#fff" stroke-width="5" stroke-linecap="round" fill="none" opacity=".7" />
+          </svg>
+          <span class="sparkle s1">✦</span>
+          <span class="sparkle s2">✧</span>
+          <span class="sparkle s3">✦</span>
+        </div>
+
+        <h1 id="welcomeTitle" class="title">How Well Do You <span class="grad-text">Know Me?</span></h1>
+        <p class="subtitle">Let's test how much you actually know about me!</p>
+
+        <form id="startForm" class="name-form" novalidate>
+          <label for="friendName" class="sr-only">Your name</label>
+          <input id="friendName" class="input" type="text" name="friendName" maxlength="30"
+                 placeholder="Type your name here…" autocomplete="off" aria-describedby="nameError" required />
+          <p id="nameError" class="error" role="alert" hidden>Please tell me your name first 💕</p>
+          <button type="submit" class="btn btn-primary btn-lg">Start Quiz <span aria-hidden="true">✨</span></button>
+        </form>
+
+        <p class="fineprint">🔒 Nothing is saved or sent anywhere. Everything stays in your browser.</p>
+      </div>
+    </section>
+
+    <!-- ================= 2. QUIZ ================= -->
+    <section id="quiz" class="screen" aria-labelledby="questionText">
+      <div id="quizCard" class="glass card quiz-card">
+        <header class="quiz-head">
+          <span id="qCounter" class="pill">Question 1 / 15</span>
+          <span id="scorePill" class="pill pill-soft" aria-live="polite">Score: 0</span>
+        </header>
+
+        <div class="progress" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+
+        <h2 id="questionText" class="question" tabindex="-1">Question goes here</h2>
+
+        <div id="options" class="options" role="group" aria-labelledby="questionText"></div>
+
+        <p id="feedback" class="feedback" aria-live="polite"></p>
+
+        <button id="nextBtn" class="btn btn-primary next-btn" type="button" hidden>Next <span aria-hidden="true">→</span></button>
+      </div>
+    </section>
+
+    <!-- ================= 3. RESULT ================= -->
+    <section id="result" class="screen" aria-labelledby="resultTitle">
+      <div class="glass card result-card">
+        <div class="score-ring" aria-hidden="true">
+          <svg viewBox="0 0 128 128">
+            <defs>
+              <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#ff8fb8" />
+                <stop offset="1" stop-color="#9d7bff" />
+              </linearGradient>
+            </defs>
+            <circle class="ring-bg" cx="64" cy="64" r="54" />
+            <circle id="ringFill" class="ring-fill" cx="64" cy="64" r="54" />
+          </svg>
+          <div class="ring-text"><span id="percentText">0%</span></div>
+        </div>
+
+        <p class="kicker" id="resultKicker">Quiz complete!</p>
+        <h2 id="resultTitle" class="title title-sm">Result</h2>
+        <p id="scoreText" class="score-line"></p>
+        <p id="resultMessage" class="result-message"></p>
+
+        <!-- Friendship certificate -->
+        <div id="certificate" class="certificate" aria-label="Friendship certificate">
+          <div class="cert-inner">
+            <p class="cert-top">✦ Official ✦</p>
+            <h3 class="cert-title">Certificate of Friendship</h3>
+            <p class="cert-small">This is proudly awarded to</p>
+            <p id="certName" class="cert-name">Friend</p>
+            <p id="certText" class="cert-text"></p>
+            <div class="cert-foot">
+              <div class="cert-col"><span id="certDate" class="cert-line"></span><span class="cert-label">Date</span></div>
+              <div class="cert-seal" aria-hidden="true">❤</div>
+              <div class="cert-col"><span id="certOwner" class="cert-line cert-sign"></span><span class="cert-label">Signed</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="playAgainBtn" class="btn btn-ghost" type="button">↻ Play Again</button>
+          <button id="printBtn" class="btn btn-ghost" type="button">🖨 Print Certificate</button>
+        </div>
+        <button id="surpriseBtn" class="btn btn-primary btn-lg surprise-btn" type="button">One Last Surprise? 💌</button>
+      </div>
+    </section>
+
+    <!-- ================= 4. SURPRISE ================= -->
+    <section id="surprise" class="screen" aria-labelledby="surpriseTitle">
+      <div class="surprise-wrap">
+        <h2 id="surpriseTitle" class="title title-sm surprise-title">A little something for you…</h2>
+
+        <div id="envelopeStage" class="envelope-stage">
+          <button id="envelope" class="envelope" type="button" aria-label="Open the envelope">
+            <span class="env-back"></span>
+            <span class="env-letter"></span>
+            <span class="env-front"></span>
+            <span class="env-flap"></span>
+            <span class="env-seal" aria-hidden="true">❤</span>
+          </button>
+          <p class="tap-hint" id="tapHint">Tap the envelope to open it 💌</p>
+        </div>
+
+        <article id="letterCard" class="letter-card" hidden aria-labelledby="letterGreeting">
+          <h3 id="letterGreeting" class="letter-greeting"></h3>
+          <div id="letterBody" class="letter-body"></div>
+          <p id="closingMsg" class="closing-msg"></p>
+          <div class="btn-row">
+            <button id="backResultBtn" class="btn btn-ghost" type="button">← Back to Result</button>
+            <button id="restartBtn" class="btn btn-primary" type="button">↻ Play Again</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
